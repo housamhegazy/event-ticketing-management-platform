@@ -25,5 +25,17 @@ const AuthMiddleware = (req, res, next) => {
   }
 };
 
+// Middleware للتأكد من الـ Role (المنظمين فقط)
+const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ 
+        message: `الـ Role الخاص بك (${req.user.role}) لا يسمح لك بالقيام بهذا الإجراء` 
+      });
+    }
+    next();
+  };
+};
+
 // 4. تصدير الكود بصيغة CommonJS
-module.exports = { AuthMiddleware };
+module.exports = { AuthMiddleware, authorize };
