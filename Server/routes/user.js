@@ -19,7 +19,12 @@ function setAuthCookie(res, token) {
 router.post("/register", async (req, res) => {
   // Handle user registration
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
+
+    // تأكد إن الـ role اللي مبعوث صح (أمان إضافي)
+    const validRoles = ["user", "organizer"];
+    const userRole = validRoles.includes(role) ? role : "user";
+
     // تحقق مما إذا كان المستخدم موجودًا بالفعل
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -38,6 +43,7 @@ router.post("/register", async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      role: userRole,
     });
     // حفظ المستخدم في قاعدة البيانات
     await NewUser.save();
@@ -56,6 +62,7 @@ router.post("/register", async (req, res) => {
         username: NewUser.username,
         email: NewUser.email,
         avatar: NewUser.avatar,
+        role: NewUser.role,
       },
     });
   } catch (error) {
@@ -94,6 +101,7 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
+        role: user.role,
       },
     });
   } catch (error) {

@@ -46,16 +46,26 @@ const Navebar = () => {
               Main Page
               </a>
             </li>
+            {isAuthenticated && user?.role === 'organizer' && (
             <li className="nav-item">
-              <a className="nav-link" href="#">
-                Events
-              </a>
+              <a className="nav-link" href="/organizer/create-event">Create Event</a>
             </li>
+            )}
+            {isAuthenticated && user?.role === 'admin' && (
             <li className="nav-item">
-              <a className="nav-link" href="#">
-                my Tickets
-              </a>
+              <a className="nav-link" href="/admin/dashboard">Admin Dashboard</a>
             </li>
+            )}
+            {isAuthenticated && user?.role === 'organizer' && (
+            <li className="nav-item">
+              <a className="nav-link" href="/organizer/events">My Events</a>
+            </li>
+            )}
+            {isAuthenticated && user?.role === 'user' && (
+            <li className="nav-item">
+              <a className="nav-link" href="/user/tickets">My Tickets</a>
+            </li>
+            )}
             {/* زرار تسجيل الدخول */}
             {isAuthenticated ? (
               <li className="nav-item ms-lg-3">

@@ -9,6 +9,7 @@ const SignUpForm = () => {
     username: "",
     email: "",
     password: "",
+    role: "user",
   });
 
   // حالات التحقق من الأخطاء
@@ -116,7 +117,6 @@ const SignUpForm = () => {
                 required
               />
             </div>
-
             {/* Email Field */}
             <div className="mb-3">
               <label className="form-label text-secondary">Email Address</label>
@@ -145,16 +145,36 @@ const SignUpForm = () => {
                 required
               />
             </div>
+            <div className="flex gap-4 my-4">
+              <label>
+                <input
+                  type="radio"
+                  value="user"
+                  name="role"
+                  checked={formData.role === "user"}
+                  onChange={handleChange} // هنستخدم نفس الـ function بتاعتك
+                />
+                user
+              </label>
 
+              <label>
+                <input
+                  type="radio"
+                  name="role"
+                  value="organizer"
+                  checked={formData.role === "organizer"}
+                  onChange={handleChange}
+                />
+                organizer
+              </label>
+            </div>
             {/* Register Button */}
             <button
               type="submit"
               className="btn btn-success w-100 fw-bold py-2 mt-3 shadow-sm"
             >
               {isLoading ? (
-                <span
-                  className="spinner-border spinner-border-sm"
-                />
+                <span className="spinner-border spinner-border-sm" />
               ) : (
                 "Sign Up"
               )}
@@ -168,7 +188,6 @@ const SignUpForm = () => {
                 href="/signin"
                 className="text-decoration-none text-success fw-bold"
               >
-
                 sign in
               </a>
             </p>
