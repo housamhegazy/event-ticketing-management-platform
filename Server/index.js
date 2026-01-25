@@ -19,10 +19,12 @@ app.use(express.json()); // عشان السيرفر يفهم الـ JSON الل�
 
 //============================ Routes =============================
 const userRoutes = require("./routes/user.js");
+const createEventRoute = require("./routes/createEventRoute.js");
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 app.use("/api/users", userRoutes);
+app.use("/api/events", createEventRoute);
 // ********************** Database & Server Start **********************
 const mongoURI = process.env.MONGODB_URI || "mongodb+srv://ticket:Qh1JeI0exjCYdmMv@event-teckiting.cgeowig.mongodb.net/all-data?appName=event-teckiting";
 

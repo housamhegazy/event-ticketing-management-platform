@@ -17,7 +17,7 @@ const AuthMiddleware = (req, res, next) => {
     // يمكن تخزين id المستخدم مباشرة في req.user
     // (إذا كانت الـ payload تحتوي على { id: user._id })
     console.log(decoded);
-    req.user = { id: decoded.id };
+    req.user = { id: decoded.id, role: decoded.role };
     next();
   } catch (error) {
     console.error("❌ JWT verification error:", error.message);
@@ -29,8 +29,8 @@ const AuthMiddleware = (req, res, next) => {
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ 
-        message: `الـ Role الخاص بك (${req.user.role}) لا يسمح لك بالقيام بهذا الإجراء` 
+      return res.status(403).json({
+        message: `hello (${req.user.role}) Access denied. You need to be one of the following roles: ${roles.join(", ")}`,
       });
     }
     next();

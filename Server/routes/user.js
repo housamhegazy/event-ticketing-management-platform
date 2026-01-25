@@ -49,7 +49,7 @@ router.post("/register", async (req, res) => {
     await NewUser.save();
 
     // إنشاء وتوقيع JWT
-    const token = jwt.sign({ id: NewUser._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: NewUser._id, role: NewUser.role }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
     setAuthCookie(res, token);
@@ -87,7 +87,7 @@ router.post("/login", async (req, res) => {
     }
 
     // إنشاء وتوقيع JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
     setAuthCookie(res, token);

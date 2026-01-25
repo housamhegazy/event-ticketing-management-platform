@@ -3,11 +3,12 @@ import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import authReducer from "./user/authSlice"; // <--- استيراد authReducer
 import { userApi } from "./user/userApi";
-
+import { createEventApi } from "./events/createEventApi";
 export const store = configureStore({
   reducer: {
     // Add the generated reducer as a specific top-level slice
     [userApi.reducerPath]: userApi.reducer,
+    [createEventApi.reducerPath]: createEventApi.reducer,
     auth: authReducer, //خاصه بحالة المستخدم
     // theme: themeReducer, // theme
   },
@@ -16,6 +17,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(userApi.middleware)
+      .concat(createEventApi.middleware),
 });
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors
