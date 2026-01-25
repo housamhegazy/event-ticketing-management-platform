@@ -6,7 +6,7 @@ import { clearAuthUser } from "../Redux/user/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useSignOutMutation } from "../Redux/user/userApi";
 const Navebar = () => {
-    const { isAuthenticated , user,isLoading } = useSelector((state) => state.auth);
+    const { isAuthenticated , user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [signOut] = useSignOutMutation();
@@ -42,7 +42,7 @@ const Navebar = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <a className="nav-link active" href="#">
+              <a className="nav-link active" href="/">
               Main Page
               </a>
             </li>
@@ -59,7 +59,7 @@ const Navebar = () => {
             {/* زرار تسجيل الدخول */}
             {isAuthenticated ? (
               <li className="nav-item ms-lg-3">
-                <a className="btn btn-outline-light rounded-pill px-4" href="#">
+                <a className="btn btn-outline-light rounded-pill px-4" href="/profile">
                   {user?.username || 'Profile'}
                 </a>
               </li>
