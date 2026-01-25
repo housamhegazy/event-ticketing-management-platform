@@ -9,12 +9,6 @@ const UserSchema = new mongoose.Schema(
       unique: true, //
       trim: true,
     },
-    name: {
-      type: String,
-      required: [true, "full name is required."],
-      trim: true, // إزالة الفراغات الزائدة من البداية والنهاية
-    },
-
     email: {
       type: String,
       required: [true, "Email is required."],

@@ -1,7 +1,43 @@
 import { Box, Grid } from "@mui/material";
 import { Outlet } from "react-router";
 import Navebar from "./components/navebar";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import LoadingPage from "./pages/loadingPage";
+import { useGetUserByNameQuery } from "./Redux/user/userApi";
+import {
+  setAuthUser,
+  clearAuthUser,
+  setLoadingAuth,
+} from "./Redux/user/authSlice";
 const Root = () => {
+  const dispatch = useDispatch();
+  const { isLoadingAuth } = useSelector((state) => state.auth);
+  // ====================================== تحديث حالة المصادقة بناءً على بيانات المستخدم ======================================
+  // import data from api only here and update it in authslice to all website
+  const {
+    data: apiuser,
+    isLoading: userLoading,
+    isError,
+  } = useGetUserByNameQuery(); // Fetch current user
+  // تحديث حالة المصادقة في الـ Redux store بناءً على نتيجة الطلب
+useEffect(() => {
+    dispatch(setLoadingAuth(true));
+    if (userLoading) return; // لسه بيجيب من السيرفر
+    if (apiuser && apiuser._id) {
+      dispatch(setAuthUser(apiuser));
+    } else if (isError) {
+      dispatch(clearAuthUser());
+    }
+    dispatch(setLoadingAuth(false));
+  }, [apiuser, userLoading, isError, dispatch]);
+
+  // loading whene userloading
+  if (isLoadingAuth) {
+    return <LoadingPage />;
+  }
+// ================================================================================================================
+
   return (
     <Box className="root" sx={{ display: "flex", flexDirection: "column" }}>
       {/* <ScrollToTop /> */}

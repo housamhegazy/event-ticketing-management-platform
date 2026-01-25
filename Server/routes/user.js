@@ -19,7 +19,7 @@ function setAuthCookie(res, token) {
 router.post("/register", async (req, res) => {
   // Handle user registration
   try {
-    const { username, name, email, password } = req.body;
+    const { username, email, password } = req.body;
     // تحقق مما إذا كان المستخدم موجودًا بالفعل
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -36,7 +36,6 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10); // 10 مستوى صعوبة التشفير
     const NewUser = new User({
       username,
-      name,
       email,
       password: hashedPassword,
     });
@@ -55,7 +54,6 @@ router.post("/register", async (req, res) => {
       user: {
         id: NewUser._id,
         username: NewUser.username,
-        name: NewUser.name,
         email: NewUser.email,
         avatar: NewUser.avatar,
       },

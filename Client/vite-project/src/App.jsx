@@ -8,7 +8,9 @@ import Home from "./pages/home";
 import ErrorPage from "./pages/ErrorPage";
 import SignUpForm from "./pages/signup";
 import SigninForm from "./pages/signin";
+import { useSelector } from "react-redux";
 function App() {
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const router = createBrowserRouter([
     {
       path: "/",
@@ -17,15 +19,15 @@ function App() {
       children: [
         {
           index: true,
-          element: <Home />,
+          element: isAuthenticated ? <Home /> : <Navigate to="/signin" />,
         },
         {
           path: "/signup",
-          element: <SignUpForm />,
+          element: !isAuthenticated ? <SignUpForm /> : <Navigate to="/" />,
         },
         {
           path: "/signin",
-          element: <SigninForm />,
+          element: !isAuthenticated ? <SigninForm /> : <Navigate to="/" />,
         },
         {
           path: "*",

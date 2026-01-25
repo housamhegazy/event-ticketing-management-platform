@@ -1,14 +1,40 @@
 import React from 'react';
 import { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
+import { useSigninMutation } from '../../Redux/user/userApi';
 const SigninForm = () => {
+  const navigate = useNavigate();
 const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [signin, { isLoading }] = useSigninMutation();
+  const [message, setMessage] = useState({ text: "", type: "" });
+
+  // validate form inputs
+  const validate = () => {
+    if (!email || !password) {
+      setMessage({ text: "Please fill in all fields.", type: "error" });
+      return false;
+    }
+    if (password.length < 6) {
+      setMessage({ text: "Password must be at least 6 characters long.", type: "error" });
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // هنا هتحط كود الـ fetch عشان تبعت البيانات للباك-إند
-    console.log("Logging in with:", email, password);
+    if (!validate()) return;
+    signin({ email, password })
+      .unwrap()
+      .then(() => {
+        setMessage({ text: "Signin successful! Redirecting...", type: "success" });
+        navigate('/');
+      })
+      .catch((error) => {
+        console.error("Signin failed:", error);
+        setMessage({ text: error.data?.message || "Signin failed. Please try again.", type: "error" });
+      });
   };
 
   return (
@@ -45,8 +71,17 @@ const [email, setEmail] = useState('');
 
             {/* زر الدخول */}
             <button type="submit" className="btn btn-primary w-100 fw-bold py-2 mt-3 shadow-sm">
-              Sign In
+              {isLoading ? (
+                <span className="spinner-border spinner-border-sm" />
+              ) : (
+                "Sign In"
+              )}
             </button>
+            {message.text && (
+              <div className={`mt-3 alert ${message.type === "success" ? "alert-success" : "alert-danger"}`} role="alert">
+                {message.text}
+              </div>
+            )}
           </form>
 
           <div className="text-center mt-4">
