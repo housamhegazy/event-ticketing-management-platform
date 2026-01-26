@@ -17,22 +17,43 @@ const CreateEvent = () => {
     isPublished: true,
   });
 
+  const [imgFile, setFile] = useState(null); // save image to send to db
   const [message, setMessage] = useState({ text: "", type: "" });
-
+  // save event data
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  //==================== sort image in state
+  const handleImage = async (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      return;
+    }
+    setFile(file);
+  };
+  // submit event data to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // 1. إنشاء كائن FormData حقيقي
+    const data = new FormData();
+    // 2. إضافة بقية بيانات الفعالية
+    for (const key in formData) {
+      data.append(key, formData[key]);
+    }
+
+    // 3. إضافة ملف الصورة الفعلي (وليس الـ Base64)
+    if (imgFile) {
+      data.append("image", imgFile);
+    }
     try {
-      await createEvent(formData).unwrap();
-      setMessage({ text: "تم إنشاء الفعالية بنجاح!", type: "success" });
+      await createEvent(data).unwrap();
+      setMessage({ text: "event created successfully!", type: "success" });
       setTimeout(() => navigate("/"), 2000);
     } catch (err) {
       setMessage({
-        text: err?.data?.message || "حدث خطأ أثناء الإنشاء",
+        text: err?.data?.message || "Failed to create event.",
         type: "error",
       });
     }
@@ -136,6 +157,27 @@ const CreateEvent = () => {
                 required
               />
             </div>
+          </div>
+
+          {/* صورة الفعالية */}
+          <div className="mb-3">
+            <label className="form-label">Event Image</label>
+            <input
+              type="file"
+              name="image"
+              className="form-control"
+              onChange={handleImage}
+            />
+            {imgFile && (
+              <div className="mt-3">
+                <img
+                  src={URL.createObjectURL(imgFile)}
+                  alt="Preview"
+                  className="img-thumbnail"
+                  style={{ maxHeight: "200px" }}
+                />
+              </div>
+            )}
           </div>
           {/* خيار النشر */}
           <div className="form-check form-switch mb-3">

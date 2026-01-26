@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import { useDispatch } from "react-redux";
 import { clearAuthUser } from "../Redux/user/authSlice";
 import { useNavigate } from "react-router-dom";
@@ -42,36 +42,36 @@ const Navebar = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <a className="nav-link active" href="/">
+              <NavLink className="nav-link " to="/">
               Main Page
-              </a>
+              </NavLink>
             </li>
             {isAuthenticated && user?.role === 'organizer' && (
             <li className="nav-item">
-              <a className="nav-link" href="/organizer/create-event">Create Event</a>
+              <NavLink className="nav-link" to="/organizer/create-event">Create Event</NavLink>
             </li>
             )}
             {isAuthenticated && user?.role === 'admin' && (
             <li className="nav-item">
-              <a className="nav-link" href="/admin/dashboard">Admin Dashboard</a>
+              <NavLink className="nav-link" to="/admin/dashboard">Admin Dashboard</NavLink>
             </li>
             )}
             {isAuthenticated && user?.role === 'organizer' && (
             <li className="nav-item">
-              <a className="nav-link" href="/organizer/events">My Events</a>
+              <NavLink className="nav-link" to="/organizer/events">My Events</NavLink>
             </li>
             )}
             {isAuthenticated && user?.role === 'user' && (
             <li className="nav-item">
-              <a className="nav-link" href="/user/tickets">My Tickets</a>
+              <NavLink className="nav-link" to="/user/tickets">My Tickets</NavLink>
             </li>
             )}
             {/* زرار تسجيل الدخول */}
             {isAuthenticated ? (
               <li className="nav-item ms-lg-3">
-                <a className="btn btn-outline-light rounded-pill px-4" href="/profile">
+                <Link className="btn btn-outline-light rounded-pill px-4" to="/profile">
                   {user?.username || 'Profile'}
-                </a>
+                </Link>
               </li>
             ) : (
               <li className="nav-item ms-lg-3">

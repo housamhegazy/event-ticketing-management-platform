@@ -29,6 +29,14 @@ export const createEventApi = createApi({
       }),
       providesTags: ["Event"],
     }),
+    //get event by id
+    getEventById: builder.query({
+      query: (id) => ({
+        url: `/api/events/event/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Event"],
+    }),
     //delete event
     deleteEvent: builder.mutation({
       query: (id) => ({
@@ -37,7 +45,15 @@ export const createEventApi = createApi({
       }),
       invalidatesTags: ["Event"],
     }),
+    //get all events
+    getAllEvents: builder.query({
+      query: () => ({
+        url: "/api/events/all-events",
+        method: "GET",
+      }),
+      providesTags: ["Event"],
+    }),
   }),
 });
-export const { useCreateEventMutation, useGetOrganizerEventsQuery, useDeleteEventMutation } =
+export const { useCreateEventMutation, useGetOrganizerEventsQuery, useDeleteEventMutation, useGetEventByIdQuery, useGetAllEventsQuery } =
   createEventApi;

@@ -22,7 +22,7 @@ export const userApi = createApi({
         method: "POST",
         body,
       }),
-      // invalidatesTags: ["User"],
+      invalidatesTags: ["User"],
     }),
 
     // ✅ Sign in existing user
@@ -32,7 +32,7 @@ export const userApi = createApi({
         method: "POST",
         body,
       }),
-      // invalidatesTags: ["User"],
+      invalidatesTags: ["User"],
     }),
     //signout
     signOut: builder.mutation({
@@ -40,7 +40,7 @@ export const userApi = createApi({
         url: "/api/users/logout",
         method: "POST",
       }),
-      // invalidatesTags: ['User'],
+      invalidatesTags: ['User'],
     }),
   }),
 });

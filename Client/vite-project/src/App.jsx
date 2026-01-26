@@ -13,6 +13,7 @@ import Profile from "./pages/profile";
 import AdminDashboard from "./pages/admin-dashboard";
 import MyEvents from "./pages/myEvents";
 import CreateEvent from "./pages/createEvent";
+import EventDetails from "./pages/myEvents/eventDetails";
 function App() {
   const { isAuthenticated ,user } = useSelector((state) => state.auth);
   const router = createBrowserRouter([
@@ -44,6 +45,10 @@ function App() {
         {
           path: "/organizer/events",
           element: isAuthenticated && user?.role === "organizer" ? <MyEvents /> : <Navigate to="/signin" />,
+        },
+        {
+          path: "/organizer/events/:id",
+          element: isAuthenticated && user?.role === "organizer" ? <EventDetails /> : <Navigate to="/signin" />,
         },
         {
           path: "/organizer/create-event",

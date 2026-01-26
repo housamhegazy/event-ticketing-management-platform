@@ -1,39 +1,15 @@
 import { Box, Grid } from "@mui/material";
 import { Outlet } from "react-router";
 import Navebar from "./components/navebar";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import LoadingPage from "./pages/loadingPage";
 import { useGetUserByNameQuery } from "./Redux/user/userApi";
-import {
-  setAuthUser,
-  clearAuthUser,
-  setLoadingAuth,
-} from "./Redux/user/authSlice";
 const Root = () => {
-  const dispatch = useDispatch();
-  const { isLoadingAuth } = useSelector((state) => state.auth);
-  // ====================================== تحديث حالة المصادقة بناءً على بيانات المستخدم ======================================
-  // import data from api only here and update it in authslice to all website
-  const {
-    data: apiuser,
-    isLoading: userLoading,
-    isError,
-  } = useGetUserByNameQuery(); // Fetch current user
-  // تحديث حالة المصادقة في الـ Redux store بناءً على نتيجة الطلب
-useEffect(() => {
-    dispatch(setLoadingAuth(true));
-    if (userLoading) return; // لسه بيجيب من السيرفر
-    if (apiuser && apiuser._id) {
-      dispatch(setAuthUser(apiuser));
-    } else if (isError) {
-      dispatch(clearAuthUser());
-    }
-    dispatch(setLoadingAuth(false));
-  }, [apiuser, userLoading, isError, dispatch]);
-
+  // =================== loading state from redux ===================
+const { isLoadingAuth } = useSelector((state) => state.auth);
+  const { isLoading: userLoading } = useGetUserByNameQuery();
   // loading whene userloading
-  if (isLoadingAuth) {
+  if (isLoadingAuth || userLoading) {
     return <LoadingPage />;
   }
 // ================================================================================================================
@@ -67,7 +43,7 @@ useEffect(() => {
           alignItems: "stretch",
         }}
       >
-        <Grid
+        {/* <Grid
           size={{ xs: 0, sm: 2, md: 3 }}
           sx={{
             // border: "1px solid",
@@ -79,11 +55,11 @@ useEffect(() => {
             // backgroundColor: theme.palette.background.default,
           }}
         >
-          drawer
-        </Grid>
+          
+        </Grid> */}
 
         <Grid
-          size={{ xs: 12, sm: 10, md: 6 }}
+          size={{ xs: 12, sm: 12, md: 9 }}
           sx={{
             display: "flex",
             flexDirection: "column",
