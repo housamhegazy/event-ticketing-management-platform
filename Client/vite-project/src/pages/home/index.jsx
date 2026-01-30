@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useGetAllEventsQuery } from "../../Redux/events/createEventApi.js";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import SearchBar from "./eventsSearch.jsx"; // استيراد الكومبوننت الجديد
 
 const Home = () => {
   const { data: events, isLoading, isError } = useGetAllEventsQuery();
@@ -22,14 +23,7 @@ const Home = () => {
       <div className="text-center mb-5 py-4 bg-light rounded-4 shadow-sm">
         <h1 className="fw-bold text-dark mb-3">Discover Amazing Events</h1>
         <p className="text-muted">Find and book the best events happening around you</p>
-        <div className="mx-auto mt-4" style={{ maxWidth: "500px" }}>
-          <input
-            type="text"
-            className="form-control form-control-lg rounded-pill shadow-sm"
-            placeholder="Search by title or category..."
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       </div>
 
       {/* عرض الكروت */}

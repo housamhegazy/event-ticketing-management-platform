@@ -59,7 +59,7 @@ router.post(
         date,
         price,
         capacity,
-        availableSeats,
+        availableSeats : capacity, // تعيين availableSeats مساوية لـ capacity عند الإنشاء
         image: image, // هنا بنخزن رابط الـ Cloudinary ✅
         organizer: organizerId,
         isPublished,
@@ -75,6 +75,7 @@ router.post(
   },
 );
 
+// get all events created by the organizer
 router.get(
   "/my-events",
   AuthMiddleware,
@@ -91,7 +92,7 @@ router.get(
   },
 );
 //get event by id 
-router.get("/event/:id",AuthMiddleware,authorize("organizer"),async(req,res)=>{
+router.get("/event/:id",AuthMiddleware,async(req,res)=>{
   const organizerId = req.user.id;
   const eventId = req.params.id;
   try {
@@ -105,7 +106,7 @@ router.get("/event/:id",AuthMiddleware,authorize("organizer"),async(req,res)=>{
     res.status(500).json({ message: "Server error while fetching event" });
   }
 })
-// get all events to all users (not only organizer)
+// get all events to all users (not only organizer) in home page
 router.get("/all-events", AuthMiddleware, async (req, res) => {
   try {
     const events = await Event.find({ isPublished: true });
@@ -142,7 +143,6 @@ router.delete(
         const folderName = parts[parts.length - 2]; // سيأخذ 'events_images'
         const fileNameWithExtension = parts[parts.length - 1]; // سيأخذ 'id.jpg'
         const publicId = `${folderName}/${fileNameWithExtension.split(".")[0]}`;
-
         console.log("Deleting Image with ID:", publicId); // عشان تتأكد في الـ Terminal
         await cloudinary.uploader.destroy(publicId);
       }
@@ -155,5 +155,191 @@ router.delete(
     }
   },
 );
+// search events by title or category
+router.get("/search", AuthMiddleware, async (req, res) => {
+  try {
+    const { title, category } = req.query;
+    const query = {};
+    if (title) {
+      query.title = { $regex: title, $options: "i" };
+    }
+    if (category) {
+      query.category = { $regex: category, $options: "i" };
+    }
+    const events = await Event.find({ ...query, isPublished: true });
+    res.json(events);
+  } catch (error) {
+    console.error("Error searching events:", error);
+    res.status(500).json({ message: "Server error while searching events" });
+  }
+});
+// update event
+router.put(
+  "/update-event/:id",  
+  AuthMiddleware,
+  authorize("organizer"),
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const eventId = req.params.id;
+      const organizerId = req.user.id;
+      const event = await Event.findById(eventId);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      if (event.organizer.toString() !== organizerId) {
+        return res
+          .status(403)
+          .json({
+            message: "Access denied. You can only update your own events.",
+          });
+      }
+      // Update event fields
+      const { title, description, category, location, date, price, capacity, isPublished } = req.body;
+      event.title = title;
+      event.description = description;
+      event.category = category;
+      event.location = location;
+      event.date = date;
+      event.price = price;
+      event.capacity = capacity;
+      event.availableSeats = capacity; // تحديث availableSeats لتساوي capacity
+      event.isPublished = isPublished;
+
+      // Update image if provided
+      if (req.file) {
+        // delete old image from cloudinary if needed (not implemented here)
+        if (event.image) {
+          const parts = event.image.split("/");
+          const folderName = parts[parts.length - 2]; // سيأخذ 'events_images'
+          const fileNameWithExtension = parts[parts.length - 1]; // سيأخذ 'id.jpg'
+          const publicId = `${folderName}/${fileNameWithExtension.split(".")[0]}`;
+
+          console.log("Deleting Image with ID:", publicId); // عشان تتأكد في الـ Terminal
+          await cloudinary.uploader.destroy(publicId);
+        }
+        // upload new image to cloudinary
+        // رفع الصورة الجديدة (التعديل هنا ✅)
+        const fileUri = bufferToDataUri(req.file.mimetype, req.file.buffer);
+        const result = await cloudinary.uploader.upload(fileUri, {
+          folder: "events_images",
+        });
+        event.image = result.secure_url;
+      }
+
+      await event.save();
+      
+      res.json({ message: "Event updated successfully", data: event });
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ message: "Server error while updating event" });
+    }
+  },
+);
+
+//book event here only for user not for organizer
+router.post("/book-event/:id", AuthMiddleware, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const userId = req.user.id;
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+    
+    if (event.organizer.toString() === userId) {
+      return res.status(400).json({ message: "You cannot book your own event" });
+    }
+    if (event.availableSeats <= 0) {
+      return res.status(400).json({ message: "No available seats for this event" });
+    }
+    // منع الشخص للحجز اكتر من مره
+    const user = await User.findById(userId);
+    if (user.bookedEvents && user.bookedEvents.includes(eventId)) {
+      return res.status(400).json({ message: "You have already booked this event" });
+    }
+    // 4. عملية الحجز (Atomic Update)
+    // بنستخدمfindOneAndUpdate عشان نضمن إن لو 100 واحد داسوا في نفس اللحظة، السيرفر ميسجلش أكتر من السعة
+    const updatedEvent = await Event.findOneAndUpdate(
+      { _id: eventId, availableSeats: { $gt: 0 } }, // شرط: لازم يكون فيه مكان
+      { $inc: { availableSeats: -1 } }, // اطرح 1 من المقاعد المتاحة
+      { new: true } // رجع البيانات الجديدة بعد التعديل
+    );
+
+    if (!updatedEvent) {
+      return res.status(400).json({ message: "عذراً، نفدت المقاعد للتو!" });
+    }
+    // إضافة eventId إلى قائمة bookedEvents للمستخدم
+    await User.findByIdAndUpdate(userId, { $addToSet: { bookedEvents: eventId } });
+    res.json({ message: "Event booked successfully", event: updatedEvent });
+
+  } catch (error) {
+    console.error("Error booking event:", error);
+    res.status(500).json({ message: "Server error while booking event" });
+  }
+});
+
+//cancel booking event
+router.post("/cancel-booking/:id", AuthMiddleware, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const userId = req.user.id;
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Check if the user has booked this event
+    const user = await User.findById(userId);
+    if (!user.bookedEvents.includes(eventId)) {
+      return res.status(400).json({ message: "You haven't booked this event" });
+    }
+
+    // Update event available seats
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { $inc: { availableSeats: 1 } },
+      { new: true }
+    );
+
+    // Remove event from user's bookedEvents list
+    await User.findByIdAndUpdate(userId, { $pull: { bookedEvents: eventId } });
+
+    res.json({ message: "Booking cancelled successfully", event: updatedEvent });
+
+  } catch (error) {
+    console.error("Error cancelling booking:", error);
+    res.status(500).json({ message: "Server error while cancelling booking" });
+  }
+});
+
+//get event i have booked
+router.get("/my-booked-events", AuthMiddleware, async (req, res) => {
+try {
+    const userId = req.user.id;
+
+    // 1. هنجيب اليوزر عشان نعرف الـ IDs اللي حجزها
+    const user = await User.findById(userId).select("bookedEvents");
+    
+    if (!user || !user.bookedEvents || user.bookedEvents.length === 0) {
+      return res.json([]); // لو محجزش حاجة نرجع مصفوفة فاضية فوراً
+    }
+
+    // 2. هنجيب تفاصيل الفعاليات دي من موديل الـ Event
+    const events = await Event.find({
+      _id: { $in: user.bookedEvents } // ابحث عن كل الـ IDs اللي في مصفوفة اليوزر
+    })
+    .select("title date location image category") // هات الحقول دي بس
+    .lean();
+
+    // نبعت المصفوفة مباشرة زي ما إنت عايز يا سمسم
+    res.json(events); 
+    
+  } catch (error) {
+    console.error("Error fetching booked events:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 module.exports = router;

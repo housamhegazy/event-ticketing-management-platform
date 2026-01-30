@@ -53,7 +53,58 @@ export const createEventApi = createApi({
       }),
       providesTags: ["Event"],
     }),
+    //search events by title and category
+    searchEvents: builder.query({
+      query: ({ title, category }) => ({
+        url: `/api/events/search?title=${title}&category=${category}`,
+        method: "GET",
+      }),
+      providesTags: ["Event"],
+    }),
+    updateEvent: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/api/events/update-event/${id}`, // تأكد من المسار في الباك إند
+        method: "PUT",
+        body: data,
+        formData: true,
+      }),
+      invalidatesTags: ["Event"],
+    }),
+    //book event
+    bookEvent: builder.mutation({
+      query: (id) => ({
+        url: `/api/events/book-event/${id}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Event"],
+    }),
+    //cancel booking
+    cancelBooking: builder.mutation({
+      query: (id) => ({
+        url: `/api/events/cancel-booking/${id}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Event"],
+    }),
+    //get booked events for user
+    getBookedEvents: builder.query({
+      query: () => ({
+        url: "/api/events/my-booked-events",
+        method: "GET",
+      }),
+      providesTags: ["Event"],
+    }),
   }),
 });
-export const { useCreateEventMutation, useGetOrganizerEventsQuery, useDeleteEventMutation, useGetEventByIdQuery, useGetAllEventsQuery } =
-  createEventApi;
+export const {
+  useCreateEventMutation,
+  useGetOrganizerEventsQuery,
+  useDeleteEventMutation,
+  useGetEventByIdQuery,
+  useGetAllEventsQuery,
+  useSearchEventsQuery,
+  useUpdateEventMutation,
+  useBookEventMutation,
+  useCancelBookingMutation,
+  useGetBookedEventsQuery,
+} = createEventApi;

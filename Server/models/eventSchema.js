@@ -32,8 +32,11 @@ const eventSchema = new mongoose.Schema({
     required: [true, "حدد أقصى عدد للحضور"] 
   },
   availableSeats: { 
-    type: Number 
+    type: Number ,
     // ملاحظة: سيتم مساواتها بالـ capacity عند الإنشاء
+    default: function() {
+      return this.capacity;
+    }
   },
   image: { 
     type: String, 

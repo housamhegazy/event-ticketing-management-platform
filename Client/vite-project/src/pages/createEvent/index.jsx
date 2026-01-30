@@ -97,6 +97,7 @@ const CreateEvent = () => {
                 name="category"
                 className="form-select"
                 onChange={handleChange}
+                value={formData.category}
               >
                 <option value="Music">Music</option>
                 <option value="Sports">Sports</option>

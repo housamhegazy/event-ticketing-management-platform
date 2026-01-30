@@ -101,7 +101,7 @@ const MyEvents = () => {
                 </div>
 
                 <div className="card-footer bg-white border-top-0 pb-3 d-flex gap-2">
-                  <button className="btn btn-outline-primary flex-grow-1 btn-sm">Edit</button>
+                  <button onClick={()=>{navigate("/organizer/edit-event/" + event._id)}} className="btn btn-outline-primary flex-grow-1 btn-sm">Edit</button>
                   <button 
                     className="btn btn-outline-danger flex-grow-1 btn-sm"
                     onClick={() => handleDelete(event._id)}

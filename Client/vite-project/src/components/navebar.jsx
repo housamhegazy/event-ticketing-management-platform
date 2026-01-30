@@ -25,8 +25,8 @@ const Navebar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
       <div className="container">
         {/* الشعار */}
-        <a className="navbar-brand fw-bold" href="#">
-          🎟️ EventTicket
+        <a className="navbar-brand fw-bold" href="/my-booked-events">
+          🎟️ my Booked events
         </a>
 
         {/* زرار القائمة للموبايل */}

@@ -59,7 +59,7 @@ const { isLoadingAuth } = useSelector((state) => state.auth);
         </Grid> */}
 
         <Grid
-          size={{ xs: 12, sm: 12, md: 9 }}
+          size={{ xs: 12, sm: 12, md: 12 }}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -73,7 +73,7 @@ const { isLoadingAuth } = useSelector((state) => state.auth);
         >
           <Outlet />
         </Grid>
-        <Grid
+        {/* <Grid
           size={{ xs: 0, sm: 0, md: 3 }}
           sx={{
             position: "sticky",
@@ -83,7 +83,7 @@ const { isLoadingAuth } = useSelector((state) => state.auth);
           }}
         >
           sidebar
-        </Grid>
+        </Grid> */}
       </Grid>
       {/* <Footer /> */}
     </Box>

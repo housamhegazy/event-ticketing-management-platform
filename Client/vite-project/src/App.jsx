@@ -14,6 +14,8 @@ import AdminDashboard from "./pages/admin-dashboard";
 import MyEvents from "./pages/myEvents";
 import CreateEvent from "./pages/createEvent";
 import EventDetails from "./pages/myEvents/eventDetails";
+import EditEvent from "./pages/editEvent";
+import MyBookedEvents from "./pages/my-booked-events";
 function App() {
   const { isAuthenticated ,user } = useSelector((state) => state.auth);
   const router = createBrowserRouter([
@@ -48,11 +50,19 @@ function App() {
         },
         {
           path: "/organizer/events/:id",
-          element: isAuthenticated && user?.role === "organizer" ? <EventDetails /> : <Navigate to="/signin" />,
+          element: isAuthenticated ? <EventDetails /> : <Navigate to="/signin" />,
         },
         {
           path: "/organizer/create-event",
           element: isAuthenticated && user?.role === "organizer" ? <CreateEvent /> : <Navigate to="/signin" />,
+        },
+        {
+          path: "/organizer/edit-event/:id",
+          element: isAuthenticated && user?.role === "organizer" ? <EditEvent /> : <Navigate to="/signin" />,
+        },
+        {
+          path: "/my-booked-events",
+          element: isAuthenticated ? <MyBookedEvents /> : <Navigate to="/signin" />,
         },
         {
           path: "*",
