@@ -20,10 +20,10 @@ import Ticket from "./pages/printTicket";
 function App() {
   const { isAuthenticated ,isLoadingAuth,user } = useSelector((state) => state.auth);
 
-  // لو لسه بنعرف المستخدم موجود ولا لأ، ما تعملش أي تحويل
-  if (isLoadingAuth) {
-    return null; // أو صفحة لودينج بسيطة
-  }
+  // // لو لسه بنعرف المستخدم موجود ولا لأ، ما تعملش أي تحويل
+  // if (isLoadingAuth) {
+  //   return null; // أو صفحة لودينج بسيطة
+  // }
   const router = createBrowserRouter([
     {
       path: "/",
