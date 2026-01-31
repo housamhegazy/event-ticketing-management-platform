@@ -2,9 +2,10 @@ import React from "react";
 import { useGetBookedEventsQuery } from "../../Redux/events/createEventApi.js";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-
+import { useNavigate } from "react-router-dom";
 const MyBookedEvents = () => {
   const { data: bookedEvents, isLoading, isError } = useGetBookedEventsQuery();
+  const navigate = useNavigate();
 
   if (isLoading)
     return (
@@ -37,9 +38,10 @@ const MyBookedEvents = () => {
               <div className="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
                 <img
                   src={event.image}
+                  onClick={()=>{navigate(`/organizer/events/${event._id}`)}}
                   className="card-img-top"
                   alt={event.title}
-                  style={{ height: "180px", objectFit: "cover" }}
+                  style={{ height: "180px", objectFit: "cover",cursor:"pointer" }}
                 />
                 <div className="card-body">
                   <span className="badge bg-light text-success mb-2">

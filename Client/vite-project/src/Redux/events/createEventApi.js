@@ -35,7 +35,7 @@ export const createEventApi = createApi({
         url: `/api/events/event/${id}`,
         method: "GET",
       }),
-      providesTags: ["Event"],
+        providesTags: (result, error, id) => [{ type: "Event", id }],
     }),
     //delete event
     deleteEvent: builder.mutation({
@@ -76,7 +76,7 @@ export const createEventApi = createApi({
         url: `/api/events/book-event/${id}`,
         method: "POST",
       }),
-      invalidatesTags: ["Event"],
+        invalidatesTags: (result, error, id) => [{ type: "Event", id }],
     }),
     //cancel booking
     cancelBooking: builder.mutation({
@@ -84,7 +84,8 @@ export const createEventApi = createApi({
         url: `/api/events/cancel-booking/${id}`,
         method: "POST",
       }),
-      invalidatesTags: ["Event"],
+        invalidatesTags: (result, error, id) => [{ type: "Event", id }],
+
     }),
     //get booked events for user
     getBookedEvents: builder.query({

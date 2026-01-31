@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { userApi } from "./userApi"; // استيراد الـ API
+import { createEventApi } from "../events/createEventApi"; // استيراد API الفعاليات
 
 const initialState = {
   isAuthenticated: false,
@@ -78,6 +79,37 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
       });
+
+
+
+      // ================== Event Booking Integration ================
+    
+    // عند نجاح حجز فعالية: نضيف الـ ID لقائمة المحجوزات عند المستخدم
+    builder.addMatcher(
+      createEventApi.endpoints.bookEvent.matchFulfilled,
+      (state, action) => {
+        const eventId = action.meta.arg; // الـ ID اللي اتبعث في الـ Query
+        if (state.user && state.user.bookedEvents) {
+          // نتأكد إن الـ ID مش موجود قبل ما نضيفه
+          if (!state.user.bookedEvents.includes(eventId)) {
+            state.user.bookedEvents.push(eventId);
+          }
+        }
+      }
+    );
+
+    // عند نجاح إلغاء الحجز: نشيل الـ ID من قائمة المحجوزات
+    builder.addMatcher(
+      createEventApi.endpoints.cancelBooking.matchFulfilled,
+      (state, action) => {
+        const eventId = action.meta.arg;
+        if (state.user && state.user.bookedEvents) {
+          state.user.bookedEvents = state.user.bookedEvents.filter(
+            (id) => id !== eventId
+          );
+        }
+      }
+    );
   },
 });
 

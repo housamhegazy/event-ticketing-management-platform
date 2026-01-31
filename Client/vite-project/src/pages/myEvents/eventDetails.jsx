@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { useBookEventMutation } from "../../Redux/events/createEventApi";
 import { useSelector } from "react-redux";
 import { useCancelBookingMutation } from "../../Redux/events/createEventApi";
+import { useGetUserByNameQuery } from "../../Redux/user/userApi";
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -14,6 +15,8 @@ const EventDetails = () => {
   const [bookEvent] = useBookEventMutation();
   const { user } = useSelector((state) => state.auth);
   const [cancelBooking] = useCancelBookingMutation();
+const { refetch: refetchUser } = useGetUserByNameQuery();
+
 
   const handleBooking = async () => {
     // هنا هنضيف منطق الحجز لاحقاً
@@ -29,6 +32,7 @@ const EventDetails = () => {
     if (result.isConfirmed) {
       try {
         await bookEvent(id).unwrap();
+        await refetchUser();
         Swal.fire("Booked!", "Your spot has been reserved.", "success");
         // تحديث الصفحة لإظهار المقاعد المتبقية
       } catch (err) {
@@ -51,6 +55,7 @@ const EventDetails = () => {
     if (result.isConfirmed) {
       try {
         await cancelBooking(id).unwrap();
+        await refetchUser();
         Swal.fire("Cancelled!", "Your booking has been cancelled.", "success");
         // تحديث الصفحة لإظهار المقاعد المتبقية
       } catch (err) {
@@ -156,7 +161,7 @@ const EventDetails = () => {
 
             {/* booking button not for organizer */}
             {/* hidd button if you are the organizer */}
-            {user && user._id !== event.organizer && (
+            {user && user._id !== event.organizer.toString() && (
               <button
                 className="btn btn-primary w-100 py-3 fw-bold rounded-3 mb-2"
                 onClick={handleBooking}

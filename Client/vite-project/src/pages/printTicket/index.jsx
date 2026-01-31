@@ -81,6 +81,13 @@ const Ticket = () => {
         >
           <i className="bi bi-printer me-2"></i> Print or Save as PDF
         </button>
+        {/* back button */}
+        <button 
+          onClick={() => window.history.back()} 
+          className="btn btn-secondary px-4 py-2 rounded-pill fw-bold shadow ms-3"
+        >
+          <i className="bi bi-arrow-left me-2"></i> Back
+        </button>
       </div>
     </div>
   );
