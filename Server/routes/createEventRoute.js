@@ -91,7 +91,7 @@ router.get(
     }
   },
 );
-//get event by id 
+//get event details by id 
 router.get("/event/:id",AuthMiddleware,async(req,res)=>{
   const organizerId = req.user.id;
   const eventId = req.params.id;
@@ -237,7 +237,7 @@ router.put(
   },
 );
 
-//book event here only for user not for organizer
+//book event here  for user and organizer
 router.post("/book-event/:id", AuthMiddleware, async (req, res) => {
   try {
     const eventId = req.params.id;
@@ -313,7 +313,7 @@ router.post("/cancel-booking/:id", AuthMiddleware, async (req, res) => {
   }
 });
 
-//get event i have booked
+//get events i have booked
 router.get("/my-booked-events", AuthMiddleware, async (req, res) => {
 try {
     const userId = req.user.id;
@@ -341,5 +341,30 @@ try {
   }
 });
 
-
+//get booked event details to create ticket details page
+router.get("/booked-event/:id", AuthMiddleware, async (req, res) => {
+  try {
+      const userId = req.user.id;
+      const eventId = req.params.id; 
+      // 1. هنجيب اليوزر عشان نتاكد انه محجز الفعالية دي
+      const user = await User.findById(userId).select("bookedEvents");
+      if (!user || !user.bookedEvents.includes(eventId)) {
+        return res.status(403).json({ message: "Access denied. You haven't booked this event." });
+      } 
+      // 2. هنجيب تفاصيل الفعالية دي من موديل الـ Event
+      const event = await Event.findById(eventId)
+      .select("title date location image category description price organizer") // هات الحقول دي بس
+      // هنا التعديل: بنروح لموديل الـ User وناخد حقل الـ username بس ✅
+      .populate("organizer", "username")
+      .lean();
+      if (!event) {
+        return res.status(404).json({ message: "Event not found." });
+      }
+      // نبعت تفاصيل الفعالية
+      res.json(event); 
+    } catch (error) {
+      console.error("Error fetching booked event details:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+});
 module.exports = router;

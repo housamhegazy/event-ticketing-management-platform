@@ -31,7 +31,6 @@ const EventDetails = () => {
         await bookEvent(id).unwrap();
         Swal.fire("Booked!", "Your spot has been reserved.", "success");
         // تحديث الصفحة لإظهار المقاعد المتبقية
-        window.location.reload();
       } catch (err) {
         Swal.fire("Error!", err?.data?.message || "Booking failed.", "error");
       }
@@ -54,7 +53,6 @@ const EventDetails = () => {
         await cancelBooking(id).unwrap();
         Swal.fire("Cancelled!", "Your booking has been cancelled.", "success");
         // تحديث الصفحة لإظهار المقاعد المتبقية
-        window.location.reload();
       } catch (err) {
         Swal.fire(
           "Error!",

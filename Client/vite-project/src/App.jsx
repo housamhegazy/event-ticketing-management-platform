@@ -16,8 +16,14 @@ import CreateEvent from "./pages/createEvent";
 import EventDetails from "./pages/myEvents/eventDetails";
 import EditEvent from "./pages/editEvent";
 import MyBookedEvents from "./pages/my-booked-events";
+import Ticket from "./pages/printTicket";
 function App() {
-  const { isAuthenticated ,user } = useSelector((state) => state.auth);
+  const { isAuthenticated ,isLoadingAuth,user } = useSelector((state) => state.auth);
+
+  // لو لسه بنعرف المستخدم موجود ولا لأ، ما تعملش أي تحويل
+  if (isLoadingAuth) {
+    return null; // أو صفحة لودينج بسيطة
+  }
   const router = createBrowserRouter([
     {
       path: "/",
@@ -63,6 +69,10 @@ function App() {
         {
           path: "/my-booked-events",
           element: isAuthenticated ? <MyBookedEvents /> : <Navigate to="/signin" />,
+        },
+        {
+          path: "/ticket/:id",
+          element: isAuthenticated ? <Ticket /> : <Navigate to="/signin" />,
         },
         {
           path: "*",

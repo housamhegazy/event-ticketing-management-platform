@@ -94,6 +94,14 @@ export const createEventApi = createApi({
       }),
       providesTags: ["Event"],
     }),
+    //get event details by id to create ticket
+    getEventDetailsForTicket: builder.query({
+      query: (id) => ({
+        url: `/api/events/booked-event/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Event"],
+    }),
   }),
 });
 export const {
@@ -107,4 +115,5 @@ export const {
   useBookEventMutation,
   useCancelBookingMutation,
   useGetBookedEventsQuery,
+  useGetEventDetailsForTicketQuery,
 } = createEventApi;

@@ -25,9 +25,9 @@ const Navebar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
       <div className="container">
         {/* الشعار */}
-        <a className="navbar-brand fw-bold" href="/my-booked-events">
-          🎟️ my Booked events
-        </a>
+        <NavLink className="navbar-brand fw-bold" to="/my-booked-events">
+          🎟️ Events Tickets
+        </NavLink>
 
         {/* زرار القائمة للموبايل */}
         <button
@@ -75,21 +75,21 @@ const Navebar = () => {
               </li>
             ) : (
               <li className="nav-item ms-lg-3">
-                <a className="btn btn-primary rounded-pill px-4" href="/signin">
+                <NavLink className="btn btn-primary rounded-pill px-4" to="/signin">
                   Sign In
-                </a>
+                </NavLink>
               </li>
             )}
             {!isAuthenticated && (
               <li className="nav-item ms-lg-2">
-                <a className="btn btn-outline-light rounded-pill px-4" href="/signup">
+                <NavLink className="btn btn-outline-light rounded-pill px-4" to="/signup">
                   Sign Up
-                </a>
+                </NavLink>
               </li>
             )}
             {isAuthenticated && (
               <li className="nav-item ms-lg-2">
-                <NavLink onClick={handleSignOut} className="btn btn-danger rounded-pill px-4" href="/signout">
+                <NavLink onClick={handleSignOut} className="btn btn-danger rounded-pill px-4" to="/signin">
                   Sign Out
                 </NavLink>
               </li>
