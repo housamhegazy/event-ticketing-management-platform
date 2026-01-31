@@ -7,7 +7,7 @@ import { useBookEventMutation } from "../../Redux/events/createEventApi";
 import { useSelector } from "react-redux";
 import { useCancelBookingMutation } from "../../Redux/events/createEventApi";
 import { useGetUserByNameQuery } from "../../Redux/user/userApi";
-
+import { Link } from "react-router-dom";
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -15,8 +15,7 @@ const EventDetails = () => {
   const [bookEvent] = useBookEventMutation();
   const { user } = useSelector((state) => state.auth);
   const [cancelBooking] = useCancelBookingMutation();
-const { refetch: refetchUser } = useGetUserByNameQuery();
-
+  const { refetch: refetchUser } = useGetUserByNameQuery();
 
   const handleBooking = async () => {
     // هنا هنضيف منطق الحجز لاحقاً
@@ -194,6 +193,14 @@ const { refetch: refetchUser } = useGetUserByNameQuery();
               Go Back
             </button>
           </div>
+          {user?.bookedEvents.includes(event._id) && (
+            <Link
+              to={`/ticket/${event._id}`}
+              className="btn btn-success w-100 rounded-pill mt-2"
+            >
+              Get My Ticket
+            </Link>
+          )}
         </div>
       </div>
     </motion.div>
