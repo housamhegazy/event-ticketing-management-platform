@@ -72,6 +72,11 @@ const Home = () => {
                       <i className="bi bi-calendar3 me-1"></i>
                       {new Date(event.date).toLocaleDateString('en-GB')}
                     </div>
+                    {/* organizer  */}
+                    <p className="text-muted small mb-0">
+                      <i className="bi bi-person-circle me-1"></i>
+                      {event.organizer?.username || "N/A"}
+                    </p>
                     <Link to={`/organizer/events/${event._id}`} className="btn btn-outline-success btn-sm px-4 rounded-pill fw-bold">
                       View Details
                     </Link>

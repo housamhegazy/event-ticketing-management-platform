@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../models/userSchema.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { AuthMiddleware } = require("../Middleware/AuthMiddleware.js");
+const { AuthMiddleware , authorize } = require("../Middleware/AuthMiddleware.js");
 
 // dont forget to npm install cookie-parser in backend
 // protected route to set auth cookie
@@ -132,5 +132,61 @@ router.post("/logout", (req, res) => {
   });
   res.status(200).json({ message: "Logged out successfully" });
 });
+//get all organizers and users who registered in the platform for admin
+router.get(
+  "/all-users", 
+  AuthMiddleware,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const users = await User.find().select("username email role");
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Server error while fetching users" });
+    }
+  },
+);
 
+//delete user from the platform by admin
+router.delete(
+  "/delete-user/:id",
+  AuthMiddleware,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const userId = req.params.id;
+      await User.findByIdAndDelete(userId);
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Server error while deleting user" });
+    }
+  }
+);
+// edit user role by admin
+router.put(
+  "/update-user/:id",
+  AuthMiddleware,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const { role } = req.body;
+      const validRoles = ["user", "organizer", "admin"];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ message: "Invalid role specified" });
+      }
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { role },
+        { new: true, select: "username email role" }
+      );
+      res.json({ message: "User role updated successfully", user: updatedUser });
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Server error while updating user role" });
+    }
+  }
+);
 module.exports = router;

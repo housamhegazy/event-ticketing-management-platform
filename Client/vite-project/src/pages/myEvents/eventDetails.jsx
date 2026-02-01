@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useBookEventMutation } from "../../Redux/events/createEventApi";
 import { useSelector } from "react-redux";
-import { useCancelBookingMutation } from "../../Redux/events/createEventApi";
+import { useCancelBookingMutation,useGetEventAttendeesQuery } from "../../Redux/events/createEventApi";
 import { useGetUserByNameQuery } from "../../Redux/user/userApi";
 import { Link } from "react-router-dom";
 const EventDetails = () => {
@@ -16,6 +16,9 @@ const EventDetails = () => {
   const { user } = useSelector((state) => state.auth);
   const [cancelBooking] = useCancelBookingMutation();
   const { refetch: refetchUser } = useGetUserByNameQuery();
+
+  const { data: attendees, refetch: refetchAttendees } = useGetEventAttendeesQuery(id);
+
 
   const handleBooking = async () => {
     // هنا هنضيف منطق الحجز لاحقاً
@@ -203,6 +206,29 @@ const EventDetails = () => {
           )}
         </div>
       </div>
+      {/* get attendees only for organizer that created the event */}
+      {user && user.role === "organizer" && user._id === event.organizer && attendees && attendees.length > 0 && (
+        <div className="mt-4">
+          <h5 className="fw-bold">Attendees ({attendees.length})</h5>
+          {/* attendees table */}
+          <table className="table table-bordered">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {attendees.map((attendee) => (
+                <tr key={attendee._id}>
+                  <td>{attendee.username}</td>
+                  <td>{attendee.email}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </motion.div>
   );
 };

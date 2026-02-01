@@ -37,5 +37,6 @@ const authorize = (...roles) => {
   };
 };
 
+
 // 4. تصدير الكود بصيغة CommonJS
 module.exports = { AuthMiddleware, authorize };

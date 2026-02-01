@@ -42,9 +42,35 @@ export const userApi = createApi({
       }),
       invalidatesTags: ['User'],
     }),
+    //get all organizers and users who registered in the platform for admin
+    getAllUsers: builder.query({
+      query: () => ({
+        url: "/api/users/all-users",
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
+    //delete user by id (for admin)
+    deleteUser: builder.mutation({
+      query: (id) => ({
+        url: `/api/users/delete-user/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
+    //update user role by id (for admin)
+    updateUser: builder.mutation({
+      query: ({ id, role }) => ({
+        url: `/api/users/update-user/${id}`,
+        method: "PUT",
+        body: { role },
+      }),
+      invalidatesTags: ["User"],
+    }),
+
   }),
 });
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const {useGetUserByNameQuery, useSignOutMutation, useSignupMutation, useSigninMutation } =
+export const {useGetUserByNameQuery, useSignOutMutation, useSignupMutation, useSigninMutation, useGetAllUsersQuery ,useDeleteUserMutation,useUpdateUserMutation} =
   userApi;

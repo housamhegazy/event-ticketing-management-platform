@@ -58,12 +58,18 @@ const MyBookedEvents = () => {
                     <i className="bi bi-geo-alt me-2 text-danger"></i>
                     {event.location}
                   </p>
+                  {/* organizer */}
+                  <p className="card-text text-muted small">
+                    <i className="bi bi-person-circle me-2"></i>
+                    Organized by: {event.organizer?.username || "N/A"}
+                  </p>
                   <Link
                     to={`/ticket/${event._id}`}
                     className="btn btn-success w-100 rounded-pill mt-2"
                   >
                     Get My Ticket
                   </Link>
+
                 </div>
               </div>
             </motion.div>

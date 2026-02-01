@@ -89,6 +89,11 @@ const MyEvents = () => {
                        {event.availableSeats} / {event.capacity} Seats
                     </span>
                   </div>
+                  {/* organizer */}
+                  <p className="card-text text-muted small">
+                    <i className="bi bi-person-circle me-2"></i>
+                    Organized by: {event.organizer?.username || "N/A"}
+                  </p>
                   
                   {/* شريط تقدم للمقاعد المحجوزة (اختياري - شكل جمالي) */}
                   <div className="progress mb-3" style={{ height: "6px" }}>

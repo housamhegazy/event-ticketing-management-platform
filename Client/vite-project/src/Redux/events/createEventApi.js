@@ -103,6 +103,23 @@ export const createEventApi = createApi({
       }),
       providesTags: ["Event"],
     }),
+    //view members who booked the event (for admin and organizer)
+    getEventAttendees: builder.query({
+      query: (id) => ({
+        url: `/api/events/event-bookings/${id}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [{ type: "Event", id }],
+    }),
+    //delete attendee from event (for admin)
+    deleteAttendee: builder.mutation({
+      query: ({ eventId, userId }) => ({
+        url: `/api/events/delete-attendee/${userId}/${eventId}`,
+        method: "DELETE",
+        body: { eventId, userId },
+      }),
+      invalidatesTags: (result, error, { eventId }) => [{ type: "Event", id: eventId }],
+    }),
   }),
 });
 export const {
@@ -117,4 +134,6 @@ export const {
   useCancelBookingMutation,
   useGetBookedEventsQuery,
   useGetEventDetailsForTicketQuery,
+  useGetEventAttendeesQuery,
+  useDeleteAttendeeMutation,
 } = createEventApi;

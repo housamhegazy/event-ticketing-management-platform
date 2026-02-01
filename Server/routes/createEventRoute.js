@@ -15,6 +15,7 @@ const {
 router.get("/", AuthMiddleware, authorize("organizer"), (req, res) => {
   res.send("Create Event Route is working");
 });
+// create event route only for organizer
 router.post(
   "/create-event",
   AuthMiddleware,
@@ -83,7 +84,9 @@ router.get(
   async (req, res) => {
     try {
       const organizerId = req.user.id;
-      const events = await Event.find({ organizer: organizerId });
+      const events = await Event.find({ organizer: organizerId }).populate(
+        "organizer", "username"
+      );
       res.json(events);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -91,7 +94,7 @@ router.get(
     }
   },
 );
-//get event details by id 
+//get event details by id to organizer and user
 router.get("/event/:id",AuthMiddleware,async(req,res)=>{
   const organizerId = req.user.id;
   const eventId = req.params.id;
@@ -106,10 +109,12 @@ router.get("/event/:id",AuthMiddleware,async(req,res)=>{
     res.status(500).json({ message: "Server error while fetching event" });
   }
 })
-// get all events to all users (not only organizer) in home page
+// get all events in home page to organizer and user
 router.get("/all-events", AuthMiddleware, async (req, res) => {
   try {
-    const events = await Event.find({ isPublished: true });
+    const events = await Event.find({ isPublished: true }).populate(
+      "organizer", "username"
+    );
     res.json(events);
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -117,26 +122,29 @@ router.get("/all-events", AuthMiddleware, async (req, res) => {
   }
 });
 
-// delete event
+// delete event only by organizer or admin
 router.delete(
   "/delete-event/:id",
   AuthMiddleware,
-  authorize("organizer"),
+  authorize("organizer", "admin"),
   async (req, res) => {
     try {
       const eventId = req.params.id;
       const organizerId = req.user.id;
+      const isAdmin = req.user.role === "admin";
       const event = await Event.findById(eventId);
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
       }
-      if (event.organizer.toString() !== organizerId) {
+      
+      if (event.organizer.toString() !== organizerId && !isAdmin) {
         return res
           .status(403)
           .json({
             message: "Access denied. You can only delete your own events.",
           });
       }
+
       // delete event from cloudinary if needed (not implemented here)
       if (event.image) {
         const parts = event.image.split("/");
@@ -155,7 +163,7 @@ router.delete(
     }
   },
 );
-// search events by title or category
+// search events by title or category by user and organizer
 router.get("/search", AuthMiddleware, async (req, res) => {
   try {
     const { title, category } = req.query;
@@ -173,7 +181,7 @@ router.get("/search", AuthMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error while searching events" });
   }
 });
-// update event
+// update event by organizer who created it
 router.put(
   "/update-event/:id",  
   AuthMiddleware,
@@ -262,7 +270,8 @@ router.post("/book-event/:id", AuthMiddleware, async (req, res) => {
     // بنستخدمfindOneAndUpdate عشان نضمن إن لو 100 واحد داسوا في نفس اللحظة، السيرفر ميسجلش أكتر من السعة
     const updatedEvent = await Event.findOneAndUpdate(
       { _id: eventId, availableSeats: { $gt: 0 } }, // شرط: لازم يكون فيه مكان
-      { $inc: { availableSeats: -1 } }, // اطرح 1 من المقاعد المتاحة
+      { $inc: { availableSeats: -1 }, 
+      $push: { attendees: req.user.id } }, // اطرح 1 من المقاعد المتاحة وضيف اليوزر لقائمة الحضور ✅
       { new: true } // رجع البيانات الجديدة بعد التعديل
     );
 
@@ -279,7 +288,7 @@ router.post("/book-event/:id", AuthMiddleware, async (req, res) => {
   }
 });
 
-//cancel booking event
+//cancel booking event for user and organizer
 router.post("/cancel-booking/:id", AuthMiddleware, async (req, res) => {
   try {
     const eventId = req.params.id;
@@ -298,7 +307,8 @@ router.post("/cancel-booking/:id", AuthMiddleware, async (req, res) => {
     // Update event available seats
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { $inc: { availableSeats: 1 } },
+      { $inc: { availableSeats: 1 }, $pull: { attendees: userId } },
+      
       { new: true }
     );
 
@@ -313,7 +323,7 @@ router.post("/cancel-booking/:id", AuthMiddleware, async (req, res) => {
   }
 });
 
-//get events i have booked
+//get events i have booked for user and organizer
 router.get("/my-booked-events", AuthMiddleware, async (req, res) => {
 try {
     const userId = req.user.id;
@@ -341,7 +351,7 @@ try {
   }
 });
 
-//get booked event details to create ticket details page
+//get booked event details to create ticket details page for user and organizer
 router.get("/booked-event/:id", AuthMiddleware, async (req, res) => {
   try {
       const userId = req.user.id;
@@ -367,4 +377,49 @@ router.get("/booked-event/:id", AuthMiddleware, async (req, res) => {
       res.status(500).json({ message: "Server error" });
     }
 });
+
+// view members who booked an event by organizer or admin 
+router.get(
+  "/event-bookings/:id",
+  AuthMiddleware,
+  authorize("organizer", "admin"),
+  async (req, res) => {
+    try {
+      const eventId = req.params.id;
+      const event = await Event.findById(eventId).populate("attendees", "username email role");
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      res.json(event.attendees);
+    } catch (error) {
+      console.error("Error fetching event bookings:", error);
+      res.status(500).json({ message: "Server error while fetching event bookings" });
+    }
+  }
+);
+
+//delete attendee from one event by admin
+router.delete(
+  "/delete-attendee/:userId/:eventId",
+  AuthMiddleware,
+  authorize("admin"),
+  async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const eventId = req.params.eventId;
+      // Remove the user from the specific event's attendees list
+      await Event.findByIdAndUpdate(eventId, { $pull: { attendees: userId }, $inc: { availableSeats: 1 } });
+      // Also remove the event from the user's bookedEvents list
+      await User.findByIdAndUpdate(userId, { $pull: { bookedEvents: eventId } });
+
+      res.json({ message: "Attendee removed from event successfully" });
+    } catch (error) {
+      console.error("Error removing attendee:", error);
+      res.status(500).json({ message: "Server error while removing attendee" });
+    }
+  },
+);
+
+
+
 module.exports = router;

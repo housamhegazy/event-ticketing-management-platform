@@ -47,6 +47,12 @@ const eventSchema = new mongoose.Schema({
     ref: 'User', // ربط الفعالية بالمنظم اللي أنشأها
     required: true 
   },
+  attendees: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User' // ربط بكل مستخدم قام بالحجز
+    }
+  ],
   isPublished: { 
     type: Boolean, 
     default: true // عشان المنظم يقدر يخفي الفعالية لو حب

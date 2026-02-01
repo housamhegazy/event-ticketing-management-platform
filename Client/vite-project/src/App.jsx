@@ -10,13 +10,15 @@ import SignUpForm from "./pages/signup";
 import SigninForm from "./pages/signin";
 import { useSelector } from "react-redux";
 import Profile from "./pages/profile";
-import AdminDashboard from "./pages/admin-dashboard";
 import MyEvents from "./pages/myEvents";
 import CreateEvent from "./pages/createEvent";
 import EventDetails from "./pages/myEvents/eventDetails";
 import EditEvent from "./pages/editEvent";
 import MyBookedEvents from "./pages/my-booked-events";
 import Ticket from "./pages/printTicket";
+import AdminDashboard from "./pages/admindashboard";
+import UsersManager from "./pages/admindashboard/allUsers";
+
 function App() {
   const { isAuthenticated ,isLoadingAuth,user } = useSelector((state) => state.auth);
 
@@ -73,6 +75,16 @@ function App() {
         {
           path: "/ticket/:id",
           element: isAuthenticated ? <Ticket /> : <Navigate to="/signin" />,
+        },
+        // only for admin
+        {
+          path: "/admin/dashboard",
+          element: isAuthenticated && user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/signin" />,
+        },
+        // only for admin
+        {
+          path: "/admin/all-users",
+          element: isAuthenticated && user?.role === "admin" ? <UsersManager /> : <Navigate to="/signin" />,
         },
         {
           path: "*",
