@@ -41,10 +41,12 @@ const UserSchema = new mongoose.Schema(
       type: Date,
       default: null, // It will be null until the first successful login
     },
-    bookedEvents:[ {
-  type: mongoose.Schema.Types.ObjectId,
-    ref: 'Event'
-  }]
+    bookedEvents: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Event",
+      },
+    ],
   },
   {
     timestamps: true, // لإضافة حقلي createdAt و updatedAt تلقائياً
