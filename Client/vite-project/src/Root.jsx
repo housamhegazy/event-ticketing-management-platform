@@ -15,13 +15,13 @@ const { isLoadingAuth } = useSelector((state) => state.auth);
 // ================================================================================================================
 
   return (
-    <Box className="root" sx={{ display: "flex", flexDirection: "column" }}>
+    <Box className="root" sx={{ display: "flex", flexDirection: "column", backgroundColor: "#e9f0e8" }}>
       {/* <ScrollToTop /> */}
       <Box
         sx={{
           width: "100%",
           maxWidth: `${1500}px`,
-          height: "64px",
+          // height: "64px",
           margin: "0 auto",
           position: "sticky",
           top: "0",

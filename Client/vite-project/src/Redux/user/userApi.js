@@ -76,6 +76,14 @@ export const userApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+    //delete user profile
+    deleteUserProfile: builder.mutation({
+      query: () => ({
+        url: `/api/users/delete-profile`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 // Export hooks for usage in functional components, which are
@@ -89,4 +97,5 @@ export const {
   useDeleteUserMutation,
   useUpdateUserMutation,
   useEditProfileMutation,
+  useDeleteUserProfileMutation,
 } = userApi;

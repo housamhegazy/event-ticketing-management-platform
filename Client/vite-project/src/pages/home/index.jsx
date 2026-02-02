@@ -18,13 +18,9 @@ const Home = () => {
   if (isError) return <div className="alert alert-danger m-5 text-center">Failed to load events. Please try again later.</div>;
 
   return (
-    <div className="container mt-4 mb-5">
+    <div className="container mb-5">
       {/* قسم الترحيب والبحث */}
-      <div className="text-center mb-5 py-4 bg-light rounded-4 shadow-sm">
-        <h1 className="fw-bold text-dark mb-3">Discover Amazing Events</h1>
-        <p className="text-muted">Find and book the best events happening around you</p>
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      </div>
+      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
       {/* عرض الكروت */}
       <div className="row g-4">

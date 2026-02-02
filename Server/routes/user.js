@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require("../models/userSchema.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const Event = require("../models/eventSchema.js");
 const {
   cloudinary,
   bufferToDataUri,
@@ -156,17 +157,16 @@ router.put(
   async (req, res) => {
     try {
       const { username, email, role } = req.body;
-
       const userId = req.user.id;
-      console.log(req.file);
 
       const user = await User.findById(userId);
       if (!user) return res.status(404).json({ message: "User not found" });
-      // 🛡️ حماية الـ Role:
-      let finalRole = user.role; // القيمة الافتراضية هي اللي موجودة حالياً في الداتابيز
 
-      // بنسمح بالتغيير فقط لو القيمة الجديدة "user" أو "organizer"
-      // وبشرط إن اليوزر الحالي مش أدمن (عشان الأدمن ميفقدش صلاحياته بالخطأ)
+      // 1. حفظ الـ Role القديم قبل التعديل للمقارنة
+      const oldRole = user.role;
+      let finalRole = user.role;
+
+      // 🛡️ حماية وتحديد الـ Role الجديد
       if (
         role &&
         (role === "user" || role === "organizer") &&
@@ -174,46 +174,53 @@ router.put(
       ) {
         finalRole = role;
       }
+
       let avatarUrl = user.avatar;
-
-      // 1. لو اليوزر بعت صورة جديدة
       if (req.file) {
-        // حذف الصورة القديمة من Cloudinary لو مش الصورة الافتراضية
         if (user.avatar && !user.avatar.includes("default")) {
-          const publicId = user.avatar
-            .split("/")
-            .slice(-2)
-            .join("/")
-            .split(".")[0];
-          await cloudinary.uploader
-            .destroy(publicId)
-            .catch((err) => console.log("Delete old avatar failed"));
+          const publicId = user.avatar.split("/").slice(-2).join("/").split(".")[0];
+          await cloudinary.uploader.destroy(publicId).catch(() => console.log("Delete old avatar failed"));
         }
-
-        // رفع الصورة الجديدة
         const fileUri = bufferToDataUri(req.file.mimetype, req.file.buffer);
-        // رفع المحتوى (content) لـ Cloudinary
         const uploadResult = await cloudinary.uploader.upload(fileUri, {
           folder: "avatars",
-          resource_type: "auto", // دي بتخلي Cloudinary يحدد النوع تلقائياً
+          resource_type: "auto",
         });
         avatarUrl = uploadResult.secure_url;
       }
 
-      // 2. تحديث البيانات في الداتابيز
+      // 2. تحديث البيانات (تأكد من تمرير role: finalRole)
       const updatedUser = await User.findByIdAndUpdate(
         userId,
-        { username, email, avatar: avatarUrl, role },
-        { new: true, select: "username email avatar role" },
+        { username, email, avatar: avatarUrl, role: finalRole },
+        { new: true, select: "username email avatar role" }
       );
 
-      // 3. الرد (مهم جداً يكون اليوزر مباشرة عشان الـ Slice بتاعك)
+      // 3. الشرط السحري: هل الـ Role اتغير؟
+      if (oldRole !== finalRole) {
+        // مسح الكوكيز من السيرفر
+        res.clearCookie("token", {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "Strict" : "Lax",
+        });
+
+        // نبعت رسالة واضحة للفرونت إند إن حصل Logout
+        return res.json({
+          message: "Role updated. Please login again.",
+          requiresLogout: true, // علامة للفرونت إند
+          user: updatedUser
+        });
+      }
+
+      // لو مفيش تغيير في الـ Role، بنرجع البيانات عادي
       res.json(updatedUser);
+
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: error.message });
     }
-  },
+  }
 );
 //get all organizers and users who registered in the platform for admin
 router.get(
@@ -241,6 +248,42 @@ router.delete(
   async (req, res) => {
     try {
       const userId = req.params.id;
+      // تحقق مما إذا كان المستخدم موجودًا
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      //delete events created by the user if organizer
+      if (user.role === "organizer") {
+        //delete images from cloudinary
+        const userEvents = await Event.find({ organizer: userId });
+        for (const event of userEvents) {
+          if (event.image && !event.image.includes("default")) {
+            const publicId = event.image
+              .split("/")
+              .slice(-2)
+              .join("/")
+              .split(".")[0];
+            await cloudinary.uploader
+              .destroy(publicId)
+              .catch((err) => console.log("Delete event image failed"));
+          }
+        }
+        await Event.deleteMany({ organizer: userId });
+      }
+      
+      // delete user avatar from cloudinary if exists
+      if (user.avatar && !user.avatar.includes("default")) {
+        const publicId = user.avatar
+          .split("/")
+          .slice(-2)
+          .join("/")
+          .split(".")[0];
+        await cloudinary.uploader
+          .destroy(publicId)
+          .catch((err) => console.log("Delete user avatar failed"));
+      }
+
       await User.findByIdAndDelete(userId);
       res.json({ message: "User deleted successfully" });
     } catch (error) {
@@ -279,4 +322,50 @@ router.put(
     }
   },
 );
+
+// delete user profile by user himself
+router.delete(
+  "/delete-profile",
+  AuthMiddleware,
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      // تحقق مما إذا كان المستخدم موجودًا
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      //delete events created by the user if organizer
+      if (user.role === "organizer") {
+        //delete images associated with the events
+        const events = await Event.find({ organizer: userId });
+        for (const event of events) {
+          if (event.image && !event.image.includes("default")) {
+            const publicId = event.image.split("/").slice(-2).join("/").split(".")[0];
+            await cloudinary.uploader.destroy(publicId).catch((err) => console.log("Delete event image failed"));
+          }
+        }
+        await Event.deleteMany({ organizer: userId });
+      }
+      // delete user avatar from cloudinary if exists
+      if (user.avatar && !user.avatar.includes("default")) {
+        const publicId = user.avatar
+          .split("/")
+          .slice(-2)
+          .join("/")  
+          .split(".")[0];
+        await cloudinary.uploader
+          .destroy(publicId)
+          .catch((err) => console.log("Delete user avatar failed"));
+      }
+      await User.findByIdAndDelete(userId);
+      res.json({ message: "User profile deleted successfully" });
+    }
+    catch (error) {
+      console.error("Error deleting user profile:", error);
+      res.status(500).json({ message: "Server error while deleting user profile" });
+    }
+  },
+);
+
 module.exports = router;

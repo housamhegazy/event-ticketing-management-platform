@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { userApi } from "./userApi"; // استيراد الـ API
 import { createEventApi } from "../events/createEventApi"; // استيراد API الفعاليات
-
 const initialState = {
   isAuthenticated: false,
   user: null,

@@ -87,6 +87,7 @@ router.get(
       const events = await Event.find({ organizer: organizerId }).populate(
         "organizer", "username"
       );
+
       res.json(events);
     } catch (error) {
       console.error("Error fetching events:", error);

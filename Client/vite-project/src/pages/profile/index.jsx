@@ -2,9 +2,12 @@ import React from 'react';
 // افترضنا إنك هتاخد البيانات من الـ Store أو من Props
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
+import { useDeleteUserProfileMutation } from '../../Redux/user/userApi';
+import Swal from 'sweetalert2';
 const Profile = () => {
 
   const userData = useSelector((state) => state.auth.user);
+  const [deleteUser] = useDeleteUserProfileMutation();
   // بيانات تجريبية في حال عدم وجود بيانات حقيقية حالياً
 // 2. حماية الكود: لو البيانات لسه مش موجودة، يظهر لودينج بدل ما يضرب
   if (!userData) {
@@ -15,6 +18,27 @@ const Profile = () => {
       </div>
     );
   }
+  const handleDeleteAccount = async () => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    });
+    if (result.isConfirmed) {
+      try {
+        await deleteUser(userData._id).unwrap();
+        Swal.fire('Deleted!', 'Your account has been deleted.', 'success');
+        // هنا ممكن تضيف إعادة توجيه للصفحة الرئيسية أو صفحة تسجيل الدخول
+      } catch (err) {
+        Swal.fire('Error!', err.data?.message || 'Failed to delete account.', 'error');
+      }
+    }
+  };
+
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
@@ -75,7 +99,7 @@ const Profile = () => {
                     Edit Profile
                   </Link>
                 )}
-                <button className="btn btn-danger btn-sm px-4 rounded-pill">
+                <button onClick={handleDeleteAccount} className="btn btn-danger btn-sm px-4 rounded-pill">
                   delete Account
                 </button>
               </div>

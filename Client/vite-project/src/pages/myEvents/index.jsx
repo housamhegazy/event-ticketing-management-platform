@@ -6,7 +6,8 @@ import { motion } from "framer-motion"; // مكتبة الأنيميشن
 import { useNavigate } from "react-router-dom";
 const MyEvents = () => {
   const navigate = useNavigate()
-  const { data: events, isLoading, isError } = useGetOrganizerEventsQuery();
+  // if data is undefined, set events to an empty array
+  const { data: events = [], isLoading, isError } = useGetOrganizerEventsQuery();
   const [deleteEvent] = useDeleteEventMutation();
 
   const handleDelete = async (id) => {
@@ -32,7 +33,6 @@ const MyEvents = () => {
 
   if (isLoading) return <div className="text-center mt-5"><div className="spinner-border text-success"></div></div>;
   if (isError) return <div className="alert alert-danger m-5">Error loading events</div>;
-
   return (
     <div className="container mt-5 mb-5">
       <div className="d-flex justify-content-between align-items-center mb-5">
@@ -42,11 +42,12 @@ const MyEvents = () => {
         </Link>
       </div>
 
-      {events?.length === 0 ? (
+      {events.length === 0 ? (
         <div className="text-center mt-5 py-5 border rounded bg-light">
           <p className="text-muted fs-4">You haven't created any events yet.</p>
         </div>
       ) : (
+        
         <div className="row g-4">
           {events.map((event, index) => (
             <div key={event._id} className="col-12 col-md-6 col-lg-4">
