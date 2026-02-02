@@ -34,7 +34,7 @@ const UsersManager = () => {
   };
 
   const handleChangeRole = async (id, currentRole) => {
-    const roles = ["user", "organizer", "admin"];
+    const roles = ["user", "organizer"];
     const nextRole = roles[(roles.indexOf(currentRole) + 1) % roles.length];
     
     try {

@@ -340,6 +340,7 @@ try {
       _id: { $in: user.bookedEvents } // ابحث عن كل الـ IDs اللي في مصفوفة اليوزر
     })
     .select("title date location image category") // هات الحقول دي بس
+    .populate("organizer", "username") // هنا التعديل: بنروح لموديل الـ User وناخد حقل الـ username بس ✅
     .lean();
 
     // نبعت المصفوفة مباشرة زي ما إنت عايز يا سمسم

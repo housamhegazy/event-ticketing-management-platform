@@ -129,6 +129,19 @@ const EditEvent = () => {
             <input type="file" className="form-control" onChange={handleImage} />
             {preview && <img src={preview} alt="Preview" className="img-thumbnail mt-2" style={{ maxHeight: "150px" }} />}
           </div>
+          {/* publish event */}
+          <div className="form-check mb-4">
+            <input 
+              className="form-check-input" 
+              type="checkbox" 
+              name="isPublished" 
+              checked={formData.isPublished} 
+              onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })} 
+            />
+            <label className="form-check-label fw-bold">
+              Publish Event
+            </label>
+          </div>
 
           <button type="submit" className="btn btn-primary w-100 py-2 fw-bold" disabled={isUpdating}>
             {isUpdating ? "Saving Changes..." : "Update Event"}

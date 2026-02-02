@@ -85,6 +85,8 @@ const { data: attendeesData, isFetching: attendeesLoading } = useGetEventAttende
                 <th>Capacity</th>
                 <th>Booked</th>
                 <th>Remaining</th>
+                <th>View Members</th>
+                <th>organizer</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -108,6 +110,9 @@ const { data: attendeesData, isFetching: attendeesLoading } = useGetEventAttende
                     >
                       <i className="bi bi-people-fill"></i> View Members
                     </button>
+                  </td>
+                  <td>{event.organizer?.username || "N/A"}</td>
+                  <td>
                     <button 
                       className="btn btn-sm btn-outline-danger"
                       onClick={() => handleDelete(event._id)}

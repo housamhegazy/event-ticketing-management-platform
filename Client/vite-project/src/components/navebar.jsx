@@ -24,10 +24,19 @@ const Navebar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
       <div className="container">
+        {/* dashboard logo only for admin  */}
+        {user?.role === "admin" && (
+          <NavLink className="navbar-brand fw-bold me-3" to="/admin/dashboard">
+            🛠️ Admin Dashboard
+          </NavLink>
+        )}
         {/* الشعار */}
-        <NavLink className="navbar-brand fw-bold" to="/my-booked-events">
-          🎟️ Events Tickets
-        </NavLink>
+        {/* for user and organizer */}
+        {(user?.role === "user" || user?.role === "organizer") && (
+          <NavLink className="navbar-brand fw-bold me-3" to="/my-booked-events">
+            🎟️ Events Tickets
+          </NavLink>
+        )}
 
         {/* زرار القائمة للموبايل */}
         <button
@@ -54,7 +63,7 @@ const Navebar = () => {
 
             {/* main page only on registered user and organizer */}
 
-            {isAuthenticated && (user?.role === "registered" || user?.role === "organizer") && (
+            {isAuthenticated && (user?.role === "user" || user?.role === "organizer") && (
               <li className="nav-item">
                 <NavLink className="nav-link " to="/">
                   Main Page
@@ -71,7 +80,7 @@ const Navebar = () => {
             {isAuthenticated && user?.role === "admin" && (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/admin/dashboard">
-                  Admin Dashboard
+                  Manage Events
                 </NavLink>
               </li>
             )}

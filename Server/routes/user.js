@@ -3,7 +3,15 @@ const router = express.Router();
 const User = require("../models/userSchema.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { AuthMiddleware , authorize } = require("../Middleware/AuthMiddleware.js");
+const {
+  cloudinary,
+  bufferToDataUri,
+  upload,
+} = require("../utils/cloudinary.js");
+const {
+  AuthMiddleware,
+  authorize,
+} = require("../Middleware/AuthMiddleware.js");
 
 // dont forget to npm install cookie-parser in backend
 // protected route to set auth cookie
@@ -49,9 +57,13 @@ router.post("/register", async (req, res) => {
     await NewUser.save();
 
     // إنشاء وتوقيع JWT
-    const token = jwt.sign({ id: NewUser._id, role: NewUser.role }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+    const token = jwt.sign(
+      { id: NewUser._id, role: NewUser.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      },
+    );
     setAuthCookie(res, token);
 
     res.status(201).json({
@@ -87,9 +99,13 @@ router.post("/login", async (req, res) => {
     }
 
     // إنشاء وتوقيع JWT
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      },
+    );
     setAuthCookie(res, token);
 
     res.status(200).json({
@@ -122,7 +138,6 @@ router.get("/profile", AuthMiddleware, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 router.post("/logout", (req, res) => {
   // Handle user logout by clearing the auth cookie
   res.clearCookie("token", {
@@ -132,15 +147,74 @@ router.post("/logout", (req, res) => {
   });
   res.status(200).json({ message: "Logged out successfully" });
 });
+
+//edit user profile (user and organizer => can edit their username,email,avatar,role)
+router.put(
+  "/edit-profile",
+  AuthMiddleware,
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const { username, email, role } = req.body;
+
+      const userId = req.user.id;
+      console.log(req.file);
+
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      let avatarUrl = user.avatar;
+
+      // 1. لو اليوزر بعت صورة جديدة
+      if (req.file) {
+        // حذف الصورة القديمة من Cloudinary لو مش الصورة الافتراضية
+        if (user.avatar && !user.avatar.includes("default")) {
+          const publicId = user.avatar
+            .split("/")
+            .slice(-2)
+            .join("/")
+            .split(".")[0];
+          await cloudinary.uploader
+            .destroy(publicId)
+            .catch((err) => console.log("Delete old avatar failed"));
+        }
+
+        // رفع الصورة الجديدة
+        const fileUri = bufferToDataUri(req.file.mimetype, req.file.buffer);
+        // رفع المحتوى (content) لـ Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(fileUri, {
+          folder: "avatars",
+          resource_type: "auto", // دي بتخلي Cloudinary يحدد النوع تلقائياً
+        });
+        avatarUrl = uploadResult.secure_url;
+      }
+
+      // 2. تحديث البيانات في الداتابيز
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { username, email, avatar: avatarUrl, role },
+        { new: true, select: "username email avatar role" },
+      );
+
+      // 3. الرد (مهم جداً يكون اليوزر مباشرة عشان الـ Slice بتاعك)
+      res.json(updatedUser);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+);
 //get all organizers and users who registered in the platform for admin
 router.get(
-  "/all-users", 
+  "/all-users",
   AuthMiddleware,
   authorize("admin"),
   async (req, res) => {
     try {
       const users = await User.find().select("username email role createdAt");
-      res.json(users);
+      //dont show admin info in the users list
+      const filteredUsers = users.filter((user) => user.role !== "admin");
+      res.json(filteredUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Server error while fetching users" });
@@ -162,7 +236,7 @@ router.delete(
       console.error("Error deleting user:", error);
       res.status(500).json({ message: "Server error while deleting user" });
     }
-  }
+  },
 );
 // edit user role by admin
 router.put(
@@ -173,20 +247,25 @@ router.put(
     try {
       const userId = req.params.id;
       const { role } = req.body;
-      const validRoles = ["user", "organizer", "admin"];
+      const validRoles = ["user", "organizer"];
       if (!validRoles.includes(role)) {
         return res.status(400).json({ message: "Invalid role specified" });
       }
       const updatedUser = await User.findByIdAndUpdate(
         userId,
         { role },
-        { new: true, select: "username email role" }
+        { new: true, select: "username email role" },
       );
-      res.json({ message: "User role updated successfully", user: updatedUser });
+      res.json({
+        message: "User role updated successfully",
+        user: updatedUser,
+      });
     } catch (error) {
       console.error("Error updating user role:", error);
-      res.status(500).json({ message: "Server error while updating user role" });
+      res
+        .status(500)
+        .json({ message: "Server error while updating user role" });
     }
-  }
+  },
 );
 module.exports = router;

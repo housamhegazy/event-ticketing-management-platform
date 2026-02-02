@@ -1,6 +1,7 @@
 import React from 'react';
 // افترضنا إنك هتاخد البيانات من الـ Store أو من Props
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router';
 const Profile = () => {
 
   const userData = useSelector((state) => state.auth.user);
@@ -69,11 +70,13 @@ const Profile = () => {
 
               {/* Actions */}
               <div className="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
-                <button className="btn btn-outline-success btn-sm px-4 rounded-pill">
-                  Edit Profile
-                </button>
+                {userData.role === 'admin' ? null : (
+                  <Link to="/profile/edit" className="btn btn-outline-success btn-sm px-4 rounded-pill">
+                    Edit Profile
+                  </Link>
+                )}
                 <button className="btn btn-danger btn-sm px-4 rounded-pill">
-                  Logout
+                  delete Account
                 </button>
               </div>
             </div>

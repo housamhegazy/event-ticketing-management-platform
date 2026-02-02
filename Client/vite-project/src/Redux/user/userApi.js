@@ -40,7 +40,7 @@ export const userApi = createApi({
         url: "/api/users/logout",
         method: "POST",
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ["User"],
     }),
     //get all organizers and users who registered in the platform for admin
     getAllUsers: builder.query({
@@ -67,10 +67,26 @@ export const userApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-
+    //edit user profile
+    editProfile: builder.mutation({
+      query: (body) => ({
+        url: "/api/users/edit-profile",
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const {useGetUserByNameQuery, useSignOutMutation, useSignupMutation, useSigninMutation, useGetAllUsersQuery ,useDeleteUserMutation,useUpdateUserMutation} =
-  userApi;
+export const {
+  useGetUserByNameQuery,
+  useSignOutMutation,
+  useSignupMutation,
+  useSigninMutation,
+  useGetAllUsersQuery,
+  useDeleteUserMutation,
+  useUpdateUserMutation,
+  useEditProfileMutation,
+} = userApi;
