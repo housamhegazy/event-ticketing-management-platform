@@ -162,7 +162,18 @@ router.put(
 
       const user = await User.findById(userId);
       if (!user) return res.status(404).json({ message: "User not found" });
+      // 🛡️ حماية الـ Role:
+      let finalRole = user.role; // القيمة الافتراضية هي اللي موجودة حالياً في الداتابيز
 
+      // بنسمح بالتغيير فقط لو القيمة الجديدة "user" أو "organizer"
+      // وبشرط إن اليوزر الحالي مش أدمن (عشان الأدمن ميفقدش صلاحياته بالخطأ)
+      if (
+        role &&
+        (role === "user" || role === "organizer") &&
+        user.role !== "admin"
+      ) {
+        finalRole = role;
+      }
       let avatarUrl = user.avatar;
 
       // 1. لو اليوزر بعت صورة جديدة
