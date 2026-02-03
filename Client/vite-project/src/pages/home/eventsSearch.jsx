@@ -1,5 +1,5 @@
 import React from "react";
-import "./SearchBar.css"; // تأكد من إنشاء هذا الملف
+import "./searchbar.css";
 
 const SearchBar = ({ searchTerm, setSearchTerm }) => {
   return (

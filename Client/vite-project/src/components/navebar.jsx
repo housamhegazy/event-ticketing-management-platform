@@ -6,6 +6,7 @@ import { clearAuthUser } from "../Redux/user/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useSignOutMutation } from "../Redux/user/userApi";
 const Navebar = () => {
+  // @ts-ignore
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();

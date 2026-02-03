@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from "react";
 import { useSelector } from "react-redux";
-import { useEditProfileMutation , useSignOutMutation } from "../../Redux/user/userApi";
+import { useEditProfileMutation  } from "../../Redux/user/userApi";
 import { clearAuthUser } from "../../Redux/user/authSlice"; // تأكد من المسار حسب مشروعك
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
@@ -8,6 +8,7 @@ import { Form, Button, Container, Card, Row, Col, Image, Spinner } from "react-b
 import { useNavigate } from "react-router";
 
 const EditProfile = () => {
+  // @ts-ignore
   const { user } = useSelector((state) => state.auth);
   const [updateProfile, { isLoading }] = useEditProfileMutation();
   
@@ -24,6 +25,7 @@ const EditProfile = () => {
   // ملء البيانات الحالية عند تحميل الصفحة
   useEffect(() => {
     if (user) {
+      // @ts-ignore
       setFormData({ username: user.username, email: user.email, role: user.role });
       setPreview(user.avatar);
     }
