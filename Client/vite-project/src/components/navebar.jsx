@@ -22,7 +22,7 @@ const Navebar = () => {
     }
   };
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-light shadow bg-dark">
       <div className="container">
         {/* dashboard logo only for admin  */}
         {user?.role === "admin" && (
@@ -32,9 +32,10 @@ const Navebar = () => {
         )}
         {/* الشعار */}
         {/* for user and organizer */}
+        <NavLink to={"/"}><img src="/logo.png" style={{width:"50px",height:"50px",borderRadius:"50%",marginRight:"10"}}></img></NavLink>
         {(user?.role === "user" || user?.role === "organizer") && (
           <NavLink className="navbar-brand fw-bold me-3" to="/my-booked-events">
-            🎟️ Events Tickets
+             Events Tickets
           </NavLink>
         )}
 
